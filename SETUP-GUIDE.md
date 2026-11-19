@@ -9,7 +9,8 @@ What's in the zip:
 | `index.html` | The whole Tend app (test version, no Claude needed) |
 | `manifest.webmanifest`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | Makes it install as "Tend" with its own icon |
 | `OneSignalSDKWorker.js` | Lets the phone receive notifications |
-| `api/push.js`, `api/config.js` | Two tiny server functions that schedule notifications. Your secret key stays here, never in the app |
+| `api/push.js`, `api/config.js` | Tiny server functions that schedule notifications. Your secret keys stay here, never in the app |
+| `api/ai.js` | Optional: lets Claude sort brain dumps if you add your own Anthropic API key (step 5) |
 | `vercel.json` | Makes phones always load the newest version |
 
 You never need to type your link anywhere: Tend works out its own address, so links in notifications and calendar reminders fill themselves in.
@@ -30,6 +31,7 @@ GitHub keeps the files; Vercel turns them into a website. Doing it this way mean
    - In the name box type exactly `api/push.js` (typing the `/` makes the folder).
    - Paste the code from **Appendix A** at the bottom of this guide. Tap **Commit changes**.
    - Again: **Add file** → **Create new file**, name `api/config.js`, paste **Appendix B**, **Commit changes**.
+   - And once more for `api/ai.js` with **Appendix C** (only needed if you want AI sorting, but it's harmless without a key).
 7. Go to **vercel.com** → log in → **Add New…** → **Project**.
 8. Tap **Continue with GitHub**, allow Vercel to see your `tend` repository, then tap **Import** next to it.
 9. Leave every setting as it is (Framework: "Other"). Tap **Deploy**. Wait about a minute.
@@ -88,6 +90,24 @@ Only replace the files I tell you to. Never rename the project's domain once tes
 **Good to know:**
 - Tend schedules the next two weeks of reminders and tops them up every time it's opened. If a tester doesn't open it for two weeks, the reminders stop. The last one says "Open Tend to keep these coming."
 - Testers who don't allow notifications (or whose phone can't do them) can tap **📅 Add daily reminders to my phone's calendar** instead.
+
+## 5. Optional: real AI for the brain dump (Claude Haiku)
+
+Without this, Tend uses **Quick sort**, which runs on the phone. With it, brain dumps are sorted by Claude, and Tend falls back to Quick sort by itself whenever the AI is unavailable (no key, no credit, too many requests, no internet).
+
+1. Go to **platform.claude.com** → sign up or log in (this is the Claude Console, separate from the Claude app).
+2. **Billing**: add a small prepaid credit (for example $5). The AI can never spend more than the credit you've loaded.
+3. **Spend limit** (recommended): **Organization settings → Billing → Spend limits** → set a monthly limit (for example $5) and an email alert at $2.
+4. **API keys** → **Create key** → name it `Tend` → copy it (starts with `sk-ant-`). You only see it once.
+5. In **Vercel** → your project → **Settings** → **Environment Variables** → add `ANTHROPIC_API_KEY` with that key. (Optional: `ANTHROPIC_MODEL`, default `claude-haiku-5-5`.)
+6. **Deployments → ⋯ → Redeploy**.
+7. Test: open Tend, tap Brain dump. The button now says **Sort it out** instead of **Quick sort**.
+
+To switch AI off again: delete the `ANTHROPIC_API_KEY` variable and redeploy. Tend goes back to Quick sort.
+
+**Cost:** one brain dump is roughly 2,000 words in and out, which on Claude Haiku 5.5 costs about a tenth of a cent. 20 testers doing 2 dumps a day is roughly **$1–3 a month**.
+
+**Privacy:** with AI on, the words of a brain dump are sent to Anthropic's API to be sorted. Nothing else from the app is sent. Each visitor is limited to 40 AI requests an hour, so nobody can run up your bill.
 
 ## What to send testers
 
@@ -152,9 +172,54 @@ module.exports = async (req, res) => {
 ## Appendix B: `api/config.js`
 
 ```js
-// Tells the app which OneSignal app to use. The App ID is public; the REST API key never leaves the server.
+// Tells the app what's switched on. The App ID is public; secret keys never leave the server.
 module.exports = (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  res.status(200).json({ appId: process.env.ONESIGNAL_APP_ID || null });
+  res.status(200).json({ appId: process.env.ONESIGNAL_APP_ID || null, ai: !!process.env.ANTHROPIC_API_KEY });
+};
+```
+
+## Appendix C: `api/ai.js`
+
+```js
+// Tend: optional AI sorting for brain dumps (and project steps / recipes).
+// Uses your own Anthropic API key from the ANTHROPIC_API_KEY environment variable.
+// If the key is missing or anything fails, the app falls back to Quick sort on the phone.
+const hits = new Map(); // simple per-visitor limit, so nobody can run up your bill
+const LIMIT = 40, WINDOW = 60 * 60 * 1000;
+
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  const KEY = process.env.ANTHROPIC_API_KEY;
+  if (!KEY) return res.status(503).json({ error: 'AI is not set up' });
+  const host = req.headers['x-forwarded-host'] || req.headers.host || '';
+  const origin = req.headers.origin || req.headers.referer || '';
+  if (origin && !origin.includes(host)) return res.status(403).json({ error: 'Not allowed' });
+  const ip = String(req.headers['x-forwarded-for'] || 'x').split(',')[0].trim(), now = Date.now();
+  const h = (hits.get(ip) || []).filter(t => now - t < WINDOW);
+  if (h.length >= LIMIT) return res.status(429).json({ error: 'Too many requests, try again later' });
+  h.push(now); hits.set(ip, h);
+  let b = req.body || {};
+  if (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { b = {}; } }
+  const prompt = String(b.prompt || '').slice(0, 24000);
+  if (prompt.length < 10) return res.status(400).json({ error: 'Empty' });
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: process.env.ANTHROPIC_MODEL || 'claude-haiku-5-5',
+        max_tokens: 4000,
+        system: 'You are the sorting helper inside Tend, a calm planner app. Reply with ONLY valid JSON, no other text.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return res.status(r.status === 429 ? 429 : 502).json({ error: (j.error && j.error.message) || 'AI error' });
+    const text = (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+    return res.status(200).json({ text });
+  } catch (e) {
+    return res.status(502).json({ error: 'Could not reach the AI' });
+  }
 };
 ```

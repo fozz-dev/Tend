@@ -849,6 +849,8 @@ input[type=time]{border:0;background:var(--card);border-radius:14px;padding:10px
 .fbend .fbcheer{width:140px;height:150px;animation:fbjump 1.2s ease-in-out infinite}@keyframes fbjump{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px) rotate(-4deg)}60%{transform:translateY(-14px) rotate(4deg)}}
 .pushc{margin-bottom:10px}.pushc .set{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.howto{margin:6px 0 12px 18px;line-height:1.6;font-weight:700}
 .dtl{padding:6px 12px}.dtrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.dtrow:first-child{border:0}.dtt{flex:1;font-weight:800;text-decoration:line-through;opacity:.6}.donepill{font-weight:900;color:#4E8A55;margin-right:6px}.wind.isdone{opacity:.62}.wind.isdone b{text-decoration:line-through}
+.tl-p.soft{outline:2px dashed var(--lav)}.tl-p.narrow{gap:2px}.tl-p.narrow .grip{padding:0 3px;margin:4px 0 4px 3px;font-size:11px}.tl-p.narrow .mini{display:none}.tl-p.narrow .tl-pb{padding:4px 4px}.tl-p.narrow b{font-size:13px;white-space:normal;overflow:visible;text-overflow:clip}.tl-b{line-height:1.25}.ovl{display:block;font-size:11px;font-weight:800;color:var(--plum2);opacity:.85;margin-top:1px}.tl-b.flex{opacity:.8}
+.csfaces{margin-bottom:12px}.cfrow{display:flex;align-items:center;gap:12px;margin-bottom:8px}.cfprev{width:70px;height:78px;flex:none}.cfprev svg{width:100%;height:100%}.csfaces .facepick{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.csfaces .fpc{flex:none;width:76px}.csfaces .fpc svg{width:62px;height:66px}.cfprev svg{transform:scale(1.15)}.mmico{font-size:30px;display:grid;place-items:center;height:56px}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -1632,14 +1634,23 @@ const QS_VERBS=new Set(('put tidy clean wash fold hang feed take bring buy get g
  'register print sign fill complete apply ask tell plan water vacuum hoover iron empty change replace move shop hoover mop wipe dust scrub cut trim repair install '+
  'update download upload backup back phone ring arrange organise organize schedule research look find learn practise practice train sleep rest relax stretch meditate '+
  'shower bathe have attend join catch leave pop swing head try work review answer prep chop mix knead proof shape bake roast fry boil grill blend defrost thaw '+
- 'water weed mow sweep declutter recycle sell list donate wrap open close lock top deposit withdraw save spend stay hang chill nap jog swim cycle ride play').split(' '));
+ 'water weed mow sweep declutter recycle sell list donate wrap open close lock top deposit withdraw save spend stay hang chill nap jog swim cycle ride play reorganise reorganize rearrange redo repaint repot refill rebook renew sew knit craft meal-prep dance climb skate').split(' '));
 const QS_ING={meeting:'meet',going:'go',having:'have',doing:'do',making:'make',getting:'get',taking:'take',picking:'pick',seeing:'see',calling:'call',visiting:'visit',heading:'head',coming:'come',dropping:'drop',watching:'watch',cooking:'cook',baking:'bake',popping:'pop',grabbing:'grab',playing:'play',running:'run',working:'work'};
 const QS_NUM={a:1,an:1,one:1,two:2,three:3,four:4,five:5,half:.5,'half an':.5};
-const QS_FIX=[[/\bhead to my room\b/gi,'tidy my room'],[/\bhead up my room\b/gi,'tidy up my room'],[/\bwanna\b/gi,'want to'],[/\bgonna\b/gi,'going to'],[/\bgotta\b/gi,'have to'],[/[’‘]/g,"'"]];
+const QS_FIX=[[/\bhead to my room\b/gi,'tidy my room'],[/\bhead up my room\b/gi,'tidy up my room'],[/\bwanna\b/gi,'want to'],[/\bgonna\b/gi,'going to'],[/\bgotta\b/gi,'have to'],[/[’‘]/g,"'"],
+  /* rambly speech: drop filler, keep the meaning */
+  [/\b(?:um+|uh+|erm|ugh|hmm+)\b[,.]?/gi,' '],[/\bso basically\b/gi,'so'],[/\b(?:i think|i guess|i mean|you know)\b,?/gi,' '],[/\b(?:kinda|kind of|sort of|sorta|basically|literally|honestly|probably|definitely|really)\b/gi,' '],
+  [/\baround about\b/gi,'around'],[/\blike\s+(?=\d|half\b|an?\b|maybe\b)/gi,''],[/\bre-(organi[sz]e|arrange|do|paint|pot|fill|book|new|turn|charge|cycle)/gi,'re$1'],
+  [/\b(?:an|one) hour and a half\b/gi,'90 minutes'],[/\ba couple of hours\b/gi,'2 hours'],[/\bhalf an hour\b/gi,'30 minutes'],
+  [/\bhalf past (\d{1,2})\b/gi,'$1:30'],[/\bquarter past (\d{1,2})\b/gi,'$1:15'],[/\bat half (\d{1,2})\b/gi,'at $1:30'],
+  [/\b(?:the\s+)?bins? (?:go|goes|need to go) out\b/gi,'take the bins out'],[/\bthere(?:'ll be| will be|'s going to be| is going to be|'s| is| are)\s+(?=drinks|a party|dinner|lunch|a (?:bbq|barbecue|meeting|class)|people|friends)/gi,'have '],
+  [/\b(i|we)(?:'ve| have)? got (?=(?:my |a |an |the |work|dinner|lunch|drinks|class|practice|training|rehearsal)\b)/gi,'$1 have '],
+  [/\b(?:the\s+)?(car|bike|boiler|laptop|phone)\s+needs?\s+to\s+go\s+in\s+for\s+(?:its|a|an|the)\s+([a-z]+)/gi,'take the $1 in for its $2'],
+  [/\b(i'?m|i am|we'?re|we are)\s+going\s+to\s+(?=the\b|a\b|an\b|my\b)/gi,'$1 go to '],[/\bmeal prep\b/gi,'meal-prep']];
 const QS_MON=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 const QS_DUR=[[/\bwatch\b.*\b(film|movie)\b/i,120],[/\bwatch\b/i,45],[/\bsleep in\b/i,60],[/\bbake\b/i,90],[/^(buy|shop)\b/i,30],[/\b(pick up|collect|return|drop)\b/i,30],[/\b(tidy|clean)\b/i,25],[/\bbins?\b/i,5],[/\bfeed\b/i,10],[/\b(transfer|pay|email|text|message|reply|book)\b/i,10],[/\bcall\b/i,15],[/\bprep\b/i,30],[/\b(cook|make)\b/i,45],[/\b(laundry|washing)\b/i,30],[/\b(run|walk|gym)\b/i,45],[/\b(form|tax|submit)\b/i,40]];
 const QS_OUT=/\b(go to|go for|meet|drop|pick up|collect|return|buy|shop|gym|dentist|doctor|appointment|class|pilates|yoga|dinner with|lunch with|coffee with|drinks|garage|library|post office|store|supermarket|caf[eé]|cinema|run|walk|vodafone)\b/i;
-const QS_EVENT=/\b(meet|appointment|dinner|lunch|coffee|brunch|drinks|class|pilates|yoga|party|meeting|interview|gym|session)\b/i;
+const QS_EVENT=/\b(meet|appointment|dinner|lunch|coffee|brunch|drinks|class|pilates|yoga|party|meeting|interview|gym|session|cinema|film|movie|concert|gig|show|theatre|theater|dance|dancing|trampolin\w*|climbing|bouldering|swimming|skating|match|game|training|practice|rehearsal|mot|work)\b/i;
 const qsCap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 function qsHour(h,m,ap,morning){h=+h;m=+(m||0);ap=(ap||'').replace(/\./g,'').toLowerCase();if(ap==='pm'&&h<12)h+=12;else if(ap==='am'&&h===12)h=0;else if(!ap&&h>=1&&h<=7&&!morning)h+=12;return h<24&&m<60?pad(h)+':'+pad(m):null}
 function qsDay(low,today,state){
@@ -1656,30 +1667,31 @@ function qsDay(low,today,state){
   return null}
 const QS_CTX=[/\b(?:tonight|this evening|tomorrow(?: morning| afternoon| evening| night)?|today|this morning|this afternoon)\b/gi,/\b(?:on\s+)?(?:next|this|coming)?\s*(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi,
   /\b(?:on\s+)?(?:the\s+)?\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/gi,/\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b\s+\d{1,2}(?:st|nd|rd|th)?\b/gi,/\bon the \d{1,2}(?:st|nd|rd|th)\b/gi,/\b\d{1,2}\/\d{1,2}\b/g,
-  /\b(?:in the|this)\s+(?:morning|afternoon|evening)\b/gi,/\b(?:morning|afternoon|evening)\b/gi,/\bafter work\b/gi,/\bon (?:the|my) way home\b/gi,/\bat some point\b/gi,/\bfirst(?: off| thing)?\b/gi,/\bwhich (?:is|takes|lasts)\b/gi];
+  /\b(?:in the|this)\s+(?:morning|afternoon|evening)\b/gi,/\b(?:morning|afternoon|evening)\b/gi,/\bnight\b(?!\s+(?:out|shift))/gi,/\b(?:on\s+)?the\s+\d{1,2}(?:st|nd|rd|th)\b/gi,/\bafter work\b/gi,/\bon (?:the|my) way home\b/gi,/\bat some point\b/gi,/\bfirst(?: off| thing)?\b/gi,/\bwhich (?:is|takes|lasts)\b/gi];
 function localSort(text){
   const today=dkey();let src=' '+String(text)+' ';QS_FIX.forEach(([a,b])=>src=src.replace(a,b));
   // 1. split into pieces, remembering the connector before each piece
-  const SEP=/(\s*[.!?;\n]+\s*|\s*,\s*|(?<!\bor)\s+(?:so that|so)\b\s*|\s+(?:and then|after that|afterwards|and also|then|also|plus|yeah|that's when|that is when|because|cause|but)\b\s*)/i;
+  const SEP=/(\s*[.!?;\n]+\s*|\s*,\s*|(?<!\bor)\s+(?:so that|so)\b\s*|\s+(?:and then|after that|afterwards|and also|then|also|plus|yeah|that's when|that is when|because|cause|but|although|though)\b\s*)/i;
   const raw=src.split(new RegExp(SEP.source,'gi')),pieces=[];let conn='';
   for(let i=0;i<raw.length;i++){const p=raw[i];if(i%2){conn=p.trim().toLowerCase().replace(/[.!?;\n]+/,'.');continue}
     let t=p.trim();if(!t){continue}
-    for(let k=0;k<4;k++){const lc=t.match(/^(and then|then|after that|afterwards|and also|also|plus|yeah|so)\b[\s,]*/i);if(!lc)break;const w=lc[1].toLowerCase();if(!/^(then|and then|after that|afterwards)$/.test(conn))conn=w;t=t.slice(lc[0].length)}
+    for(let k=0;k<4;k++){const lc=t.match(/^(and then|then|after that|afterwards|and also|also|plus|yeah|so|although|though|right|okay|ok)\b[\s,]*/i);if(!lc)break;const w=lc[1].toLowerCase();if(!/^(then|and then|after that|afterwards)$/.test(conn))conn=w;t=t.slice(lc[0].length)}
     if(!t){continue}
     // split "X and Y" when Y starts a new action
     const subs=t.split(new RegExp(`\\s+and\\s+(?=(?:(?:i|we)(?:'ll|'m| will| need to| have to| want to| should| must| am going to| are going to)?\\s+)?(?:(?:${[...QS_VERBS].join('|')})\\b))`,'i'));
     subs.forEach((s,j)=>pieces.push({text:s.trim(),conn:j?'and':conn}));conn=''}
   // 2. read each piece
-  let day=F.target,named=false,pendPart=null,dayPart=null,carry=null;const items=[];
+  let day=F.target,named=false,pendPart=null,dayPart=null,carry=null,anyNext=false;const items=[];
   const prevItem=()=>items[items.length-1];
   pieces.forEach(pc=>{
     let s=' '+pc.text+' ',c=pc.conn;if(carry){if(!/^(then|and then|after that|afterwards)$/.test(c))c=carry;carry=null}
     if(/^because|^cause/.test(c)){return}
     let low=s.toLowerCase();
+    if(/^(?:\.|and)$/.test(c)&&prevItem()&&!prevItem().date&&/^\s*(?:i|we)\s+(?:also\s+)?(?:need|have|want|should|must|still)\b/.test(low)&&!qsDay(low,today)){day=F.target;named=false;anyNext=true} /* after an anytime item, the next “I need to…” is anytime too */
     // self-correction: "I'll make like I'll prep…" keeps the last version
     const rs=low.search(/\blike\s+(?=(?:i'?ll|i'?m|i am|i will)\b)/);if(rs>=0){s=' '+s.slice(rs+5);low=s.toLowerCase()}
     // purpose / reason pieces: "so I have enough money to collect the phone"
-    if((c==='so'||c==='so that')&&/^\s*(i|we)\s+(actually\s+)?(have|can|could|will have|get)\b|^\s*(that|it's|its)\b/.test(low)){
+    if((c==='so'||c==='so that')&&prevItem()&&!/\d/.test(low)&&!qsDay(low,today)&&/^\s*(i|we)\s+(actually\s+)?(have|can|could|will have|get)\b|^\s*(that|it's|its)\b/.test(low)&&(c==='so'||c==='so that')&&prevItem()){
       const words=low.split(/[^a-z]+/).filter(w=>w.length>=4&&!['have','enough','actually','money','need','could','will','that','with','this'].includes(w));
       const me=prevItem(),tgt=items.find(x=>x!==me&&words.some(w=>x.title.toLowerCase().includes(w)));if(me&&tgt&&!tgt.after.includes(me.n))tgt.after.push(me.n);return}
     // info: "the Pilates is one hour", "maybe 30 minutes", "which is like 45 minutes"
@@ -1689,6 +1701,10 @@ function localSort(text){
       if(m){const n=QS_NUM[m[1]]!=null?QS_NUM[m[1]]:+m[1];return{dur:Math.round(/^h/.test(m[2])?n*60:n),re:m[0]}}return null};
     const info=low.match(/^\s*(?:the\s+)?([a-z]+)\s+(?:is|takes|lasts|will take|should take)\b/);
     if(info&&durOf(low)){const d=durOf(low),it=items.slice().reverse().find(x=>x.title.toLowerCase().includes(info[1]))||prevItem();if(it){if(d.dur)it.duration=d.dur;else{it.minDuration=d.min;it.maxDuration=d.max}}return}
+    // "I'll finish trampolining at 7:30", "I'll be there till 1": an end time for something already said
+    {const em=low.match(/^\s*(?:and\s+)?(?:i|we)?\s*(?:'ll|'d| will| should| might)?\s*(?:finish|end|be (?:done|finished|there|back|out)|stay|get out|leave|wrap up)\b(.*?)\b(?:at|till|til|until|to|by|around)\s+(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?(?![\d:])/);
+      if(em){const rest=em[1].replace(/[^a-z ]/g,' ').split(' ').filter(w=>w.length>=4);const tg=items.slice().reverse().find(x=>x.time&&rest.some(w=>x.title.toLowerCase().includes(w.slice(0,6))))||items.slice().reverse().find(x=>x.time&&x.kind==='event');
+        if(tg){const e=qsHour(em[2],em[3],/am|pm/.test(em[4]||'')?em[4]:'',false);if(e){let d=toMin(e)-toMin(tg.time);if(d<=0)d+=720;if(d>0&&d<=720){tg.duration=d;tg.minDuration=null;tg.maxDuration=null}}return}}}
     // context: day, part, deadline, time, duration
     const cut=re=>{const m=low.match(re);if(!m)return null;s=s.replace(new RegExp(m[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'),' ');low=s.toLowerCase();return m};
     let rpt=null,rS=null,rE=null,due=null;{const WDN={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6},W='(sun|mon|tue|wed|thu|fri|sat)(?:s|n|sday|nesday|rsday|urday|day|r|rs)?(?:days?)?s?';let m;
@@ -1705,13 +1721,19 @@ function localSort(text){
       if(dm){if(dm[1]){const n=QS_NUM[dm[1]]||+dm[1];due=addDays(today,Math.round(n*(/^w/.test(dm[2])?7:/^m/.test(dm[2])?30:1)))}else if(dm[3]){due=addDays(today,dm[3]==='next'?(dm[4]==='week'?14:60):(dm[4]==='week'?7:30))}else due=addDays(today,dm[5]==='week'?7:30);cut(new RegExp(dm[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&')))}
       cut(/\bsome ?time\b/)}
     const dd=rpt?null:qsDay(low,today);if(dd){day=dd.day;named=true;dayPart=dd.part==='evening'&&/\b(tonight|this evening)\b/.test(low)?'evening':null}
-    let part=/\bafter work\b/.test(low)?'after_work':(low.match(/\b(morning|afternoon|evening)\b/)||[])[1]||null;
+    let part=/\bafter work\b/.test(low)?'after_work':(low.match(/\b(morning|afternoon|evening)\b/)||[])[1]||(/\b(?:\w+day )?night\b/.test(low)&&!/\bnight (?:out|shift)\b/.test(low)?'evening':null);
     if(/\btonight\b|\bthis evening\b/.test(low))part='evening';
     if(!part&&dayPart)part=dayPart;
-    let deadline=null,time=null,dur=null,min=null,max=null;const saidMorning=/\bmorning\b/.test(low);
+    let deadline=null,time=null,dur=null,min=null,max=null,endT=null;const saidMorning=/\bmorning\b/.test(low);
+    {// a range: "from 9 till 5", "4pm to 7:30", "which finishes at 3:30"
+      const r=low.match(/\b(?:from\s+|at\s+)?(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?\s*(?:to|till|til|until|-|–)\s*(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?\b(?!\s*(?:hours?|hrs?|mins?|minutes?|days?|weeks?|steps?|people))/);
+      if(r&&!rpt&&(/^\s*from\b|^\s*at\b/.test(r[0])||r[3]||r[6]||r[2]||r[5]||/\bwork\b/.test(low))){const work=/\bwork\b/.test(low)&&+r[1]>=6&&+r[1]<=11;const a=qsHour(r[1],r[2],/am|pm/.test(r[3]||'')?r[3]:'',saidMorning||work),b=qsHour(r[4],r[5],/am|pm/.test(r[6]||'')?r[6]:'',false);
+        if(a&&b){time=a;endT=b;s=s.replace(new RegExp(r[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'),' ');low=s.toLowerCase()}}
+      const f=low.match(/\b(?:which|that|and it|it)?\s*(?:finishes|ends|finish|end|is over|wraps up)\s+(?:at|by|around)\s+(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?(?![\d:])/);
+      if(f){endT=qsHour(f[1],f[2],/am|pm/.test(f[3]||'')?f[3]:'',false);s=s.replace(new RegExp(f[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'),' ');low=s.toLowerCase()}}
     let m=low.match(/\b(?:before|by|until)\s+(?:(?:it|they|the [a-z]+)\s+)?(?:closes?|close|shuts?)?\s*(?:at\s+)?(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?(?![\d:])/);
     if(m){deadline=qsHour(m[1],m[2],m[3],saidMorning);s=s.replace(new RegExp(m[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'),' ');low=s.toLowerCase()}
-    m=low.match(/\b(?:at|from)\s+(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.|o'?clock)?(?![\d:])/)||low.match(/\b(\d{1,2}):(\d{2})\s*(am|pm)?\b/)||low.match(/\b(\d{1,2})\s*(?:()?)(am|pm)\b/);
+    m=time?null:(low.match(/\b(?:at|from)\s+(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.|o'?clock)?(?![\d:])/)||low.match(/\b(\d{1,2}):(\d{2})\s*(am|pm)?\b/)||low.match(/\b(\d{1,2})\s*(?:()?)(am|pm)\b/));
     if(m){time=qsHour(m[1],m[2],/am|pm/.test(m[3]||'')?m[3]:'',saidMorning);s=s.replace(new RegExp(m[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'),' ');low=s.toLowerCase()}
     if(/\bat noon\b|\bat midday\b/.test(low)){time='12:00';s=s.replace(/\bat (noon|midday)\b/i,' ');low=s.toLowerCase()}
     const d2=durOf(low);if(d2){if(d2.dur)dur=d2.dur;else{min=d2.min;max=d2.max}s=s.replace(new RegExp(d2.re.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'),' ');low=s.toLowerCase()}
@@ -1723,11 +1745,13 @@ function localSort(text){
       .replace(/^(?:i|we)\s*(?:'ll|'m|'d|'re| will| would| am| are)?\s*(?:also\s+|just\s+|really\s+|still\s+|probably\s+|definitely\s+)?(?:guess\s+(?:i'?ll\s+)?|think\s+(?:i'?ll\s+)?)?(?:need to|have to|got to|want to|going to|should|must|could|might|can|will|'ll)?\s*/i,'')
       .replace(/^(?:i guess|i think|i mean|i'?ll|we'?ll|i'?m|we'?re)\s+/i,'')
       .replace(/^(?:make sure (?:that )?(?:i |to )?|remember to |don't forget to |try to |try and )/i,'');
-    const first=(t.match(/^([a-z']+)/i)||[])[1],fl=(first||'').toLowerCase(),base=QS_ING[fl]||fl;
-    const isVerb=QS_VERBS.has(base)||base==='have'||(rpt&&t.replace(/[^a-z]/gi,'').length>=3);
+    t=t.replace(/^(?:go|going) to\s+(?=(?:make|bake|do|get|buy|cook|see|have|try|start|finish|call|clean|tidy|sell|sew|read|watch|write)\b)/i,'');
+    const first=(t.match(/^([a-z'-]+)/i)||[])[1],fl=(first||'').toLowerCase(),base=QS_ING[fl]||fl;
+    const gerund=/^[a-z]{3,}ing$/.test(fl)&&!QS_ING[fl]&&!!(time||named||dd||QS_EVENT.test(t));
+    const isVerb=QS_VERBS.has(base)||base==='have'||gerund||(rpt&&t.replace(/[^a-z]/gi,'').length>=3);
     if(!isVerb){
       const pv=prevItem();
-      if(pv&&pv.shopping&&t.length>1&&!/\b(it|them|this|that)\b/i.test(t)){const more=t.replace(/^(?:and\s+)?(?:some|also|more)\s+/i,'').split(/\s*(?:,|\band\b|&)\s*/).map(x=>x.replace(/\b(some|the|my|a|an)\b/gi,'').trim()).filter(x=>x.length>1);pv.shop.push(...more);pv.title='Buy '+pv.shop.join(', ');if(afterWord&&items.length>1){const pp=items[items.length-2];if(pp.date===pv.date&&!pv.after.includes(pp.n))pv.after.push(pp.n)}pv.quote+=' … '+pc.text.slice(0,50);return}
+      if(pv&&pv.shopping&&t.length>1&&!/\b(it|them|this|that)\b/i.test(t)){const more=t.replace(/^(?:need|want|also need|and)\s+/i,'').replace(/^(?:and\s+)?(?:some|also|more)\s+/i,'').split(/\s*(?:,|\band\b|&)\s*/).map(x=>x.replace(/\b(some|the|my|a|an)\b/gi,'').trim()).filter(x=>x.length>1);pv.shop.push(...more);pv.title='Buy '+pv.shop.join(', ');if(afterWord&&items.length>1){const pp=items[items.length-2];if(pp.date===pv.date&&!pv.after.includes(pp.n))pv.after.push(pp.n)}pv.quote+=' … '+pc.text.slice(0,50);return}
       if(pv&&(dur||min)&&!pv.duration&&!pv.minDuration){if(dur)pv.duration=dur;else{pv.minDuration=min;pv.maxDuration=max}return}
       if(part&&t.replace(/[^a-z]/gi,'').length<3){pendPart=part;if(/^(then|and then|after that|afterwards)$/.test(c))carry=c}
       return}
@@ -1739,11 +1763,16 @@ function localSort(text){
     if(/^(spend|stay|hang out|hang)\b/i.test(t)&&pv&&(dur||min)){const w=t.match(/\bwith (.+)$/i);if(w&&!/\bwith\b/i.test(pv.title))pv.title+=' with '+w[1].replace(/\b(my)\b/gi,'').replace(/\s+/g,' ').trim();if(dur)pv.duration=dur;else{pv.minDuration=min;pv.maxDuration=max}pv.out=true;return}
     let title=t,kind='task',shopping=false,shop=[];
     let mm;
-    if(mm=title.match(/^meet\s+(.+?)\s+for\s+(?:a\s+|an\s+|some\s+)?(.+)$/i))title=`${qsCap(mm[2])} with ${mm[1].replace(/\band\b/gi,'&')}`;
+    if(mm=title.match(/^meet\s+(.+?)\s+for\s+(?:a\s+|an\s+|some\s+)?(.+)$/i)){const at=mm[2].match(/^(.+?)(\s+(?:at|in)\s+.+)$/);title=at?`${qsCap(at[1])} with ${mm[1].replace(/\band\b/gi,'&')}${at[2]}`:`${qsCap(mm[2])} with ${mm[1].replace(/\band\b/gi,'&')}`}
     else if(mm=title.match(/^meet\s+(.+)$/i))title=`Meet ${mm[1].replace(/\band\b/gi,'&')}`;
     else if(mm=title.match(/^(?:go|head|pop|swing)\s+(?:over\s+)?to\s+(?:the\s+)?(.+?)\s+(?:to|and)\s+(.+)$/i))title=`${mm[2]} at ${mm[1]}`;
     else if(mm=title.match(/^(?:go|head|pop)\s+(?:out\s+)?(?:to|for)\s+(?:the\s+|a\s+|an\s+|some\s+)?(.*?\b(gelato|ice cream|coffee|lunch|dinner|brunch|breakfast|drinks?|cake|pizza|sushi|food))\b/i))title=`Go for ${mm[2].toLowerCase()}`;
+    else if(mm=title.match(/^(?:go|head|pop)\s+(?:over\s+)?to\s+(?:the\s+)?(gym|pool|swimming pool|cinema|park|sauna|climbing gym|class|dance class)\b(.*)$/i))title=qsCap(mm[1])+mm[2];
     else if(mm=title.match(/^have\s+(?:a\s+|an\s+|my\s+|the\s+)?(.+)$/i))title=qsCap(mm[1]);
+    if(mm=title.match(/^do\s+(?:quite\s+)?(?:a\s+)?(big|bigger|small|quick|long|proper)\s+([a-z]+)\s*$/i)){const v=mm[2].toLowerCase(),tg=items.slice().reverse().find(x=>x.verb===v||x.title.toLowerCase().startsWith(v));if(tg){if(!/\(/.test(tg.title))tg.title+=` (${mm[1].toLowerCase()} ${v})`;return}}
+    if(mm=title.match(/^do\s+(?:a\s+|some\s+)?(big|quick|deep|proper)?\s*clean\s+(?:of|in|on)\s+(?:the\s+|my\s+)?(.+)$/i))title=`Clean the ${mm[2]}${mm[1]?` (${mm[1].toLowerCase()} clean)`:''}`;
+    else if(/^do\s+(?:a\s+|the\s+)?(?:big\s+|weekly\s+|quick\s+)?(?:food|grocery|groceries|supermarket)\s+shop/i.test(title)){title='Food shop';shopping=true}
+    else if(/^(?:do\s+(?:some\s+|my\s+)?)?meal-prep\b/i.test(title))title='Meal prep'+title.replace(/^(?:do\s+(?:some\s+|my\s+)?)?meal-prep/i,'');
     if(mm=title.match(/^(buy|get|grab|pick up|pick)\s+(?:up\s+)?(?:some\s+)?(.+)$/i)){
       const list=mm[2].replace(/\bfor (?:the|my|a|an)? ?[a-z ]+$/i,'').split(/\s*(?:,|\band\b|&)\s*/).map(x=>x.replace(/\b(some|the|my|a|an)\b/gi,'').replace(/\s+/g,' ').trim()).filter(x=>x.length>1);
       const groc=list.length&&list.every(x=>sectionOf(x)!=='other'),nonShop=/\b(phone|parcel|package|keys|prescription|ticket|car|kids?|child|laptop|order|post|mail)\b/i.test(mm[2]);
@@ -1751,36 +1780,47 @@ function localSort(text){
     // tidy up the wording
     title=' '+title+' ';
     title=title.replace(/\bmoney for (?:my |the )?savings\b/gi,'savings').replace(/\b(?:my |the )?bank account\b/gi,'bank').replace(/\binto\b/gi,'to')
-      .replace(/\b(my|the|some|our|your|just|really|actually|there|kind of|sort of|like|also|please)\b/gi,' ').replace(/\s+/g,' ').trim();
+      .replace(/\b(my|some|our|your|its|just|really|actually|there|kind of|sort of|like|also|please)\b/gi,' ').replace(/\b[Tt]he\b(?!\s+[A-Z])/g,' ').replace(/\s+/g,' ').trim();
+    if(mm=title.match(/^make\s+(.*\b(?:loaves|loaf|bread)\b.*)$/i)){let x=mm[1];if(/sourdough/i.test(text)&&!/sourdough/i.test(x))x=x.replace(/\b(loaves|loaf|bread)\b/i,'sourdough $1');title='Bake '+x}
     const fm=title.match(/^(.*?)\s+for\s+(.+)$/i);if(fm&&fm[2].split(' ').some(w=>w.length>3&&fm[1].toLowerCase().includes(w.toLowerCase().slice(-5))))title=fm[1];
     if(fm&&!/\bwith\b/.test(fm[1])&&fm[1].split(' ').length>=4&&!/\b(mum|mom|dad|sister|brother|friend|partner|kids?|[A-Z][a-z]+)\b/.test(fm[2]))title=fm[1];
-    title=qsCap((title.split(' ').length>2?title.replace(/\s+(in|on|at|to|for|with|and)$/i,''):title).trim());if(!shopping&&title.split(' ').length>8)title=title.split(' ').slice(0,8).join(' ');
+    title=qsCap((title.split(' ').length>2?title.replace(/\s+(in|on|at|to|for|with|and)$/i,''):title).trim());{const lim=/\s(?:at|in)\s+[A-Z]/.test(title)?12:8;if(!shopping&&title.split(' ').length>lim)title=title.split(' ').slice(0,lim).join(' ')}
     if(title.replace(/[^a-z]/gi,'').length<3)return;
-    if(time&&(QS_EVENT.test(title)||/^(meet|have)\b/i.test(t)))kind='event';
+    if(/^work from home$/i.test(title)&&!time){time='09:00';endT='17:00'}
+    if(time&&(QS_EVENT.test(title)||/^(meet|have)\b/i.test(t)||gerund||endT||/\bat\s+(?:[A-Z]|mine\b|home\b)/.test(title)))kind='event';
+    if(endT&&time){let d=toMin(endT)-toMin(time);if(d<=0)d+=720;if(d>0&&d<=900)dur=d}
     let repeat=null,phases=null,tsteps=null;
     if(rpt){const st0=rS||time;if(st0){time=st0;if(rE)dur=toMin(rE)-toMin(st0);kind='event'}let fk=today;for(let g=0;g<14;g++){const kk=addDays(today,g);if(rOccurs({freq:rpt.freq,days:rpt.days,anchor:today},kk)){fk=kk;break}}
       repeat={freq:rpt.freq,days:rpt.days,until:null};var rDate=fk}
     if(due&&pv&&c==='and'&&pv.kind==='project'&&!pv.due)pv.due=due;
     const tp=tplFor(title);
-    if(!rpt&&!shopping&&(tp&&tp[2]||(due&&kind!=='event'))){kind='project';phases=tp?tp[4]:[['Steps',[['Decide the first small step',10,'low']]]];time=null}
+    if(!rpt&&!shopping&&(tp&&tp[2]||(due&&kind!=='event'&&title.split(' ').length>3&&!/^(call|email|text|message|book|pay|renew|post|send|ring|phone|order|cancel|return)\b/i.test(title)))){kind='project';phases=tp?tp[4]:[['Steps',[['Decide the first small step',10,'low']]]];time=null}
     else if(!rpt&&tp&&!tp[2]&&kind==='task')tsteps=tplSteps(tp).map(x=>({title:x.title,minutes:x.minutes}));
     if(kind==='project'&&pv&&pv.kind==='project'&&!due&&pv.due&&c==='and')due=pv.due;
     const out=shopping||QS_OUT.test(t)||QS_OUT.test(title);
     const n=items.length;
-    const it={n,mention:n,title,kind,energy:'medium',date:rpt?rDate:(kind==='project'?null:(named?day:null)),dateSaid:rpt?true:(kind==='project'?false:named),time,part:time||kind==='project'?null:(part||pendPart),deadline,approx:null,duration:dur,minDuration:min,maxDuration:max,after:[],out,shopping,shop,quote:pc.text.slice(0,90),verb:base,repeat,due,phases,tsteps};
-    pendPart=null;
+    const it={n,mention:n,anytime:!rpt&&kind==='task'&&!named&&!time&&(anyNext||!!due),title,kind,energy:'medium',date:rpt?rDate:(kind==='project'||(due&&!dd)?null:(named?day:null)),dateSaid:rpt?true:(kind==='project'||(due&&!dd)?false:named),time,part:time||kind==='project'?null:(part||pendPart),deadline,approx:null,duration:dur,minDuration:min,maxDuration:max,after:[],out,shopping,shop,quote:pc.text.slice(0,90),verb:base,repeat,due,phases,tsteps};
+    pendPart=null;anyNext=anyNext&&!named;
     // order links: then / after that / and then / "after" / "on the way home" → after the previous item on the same day; "before that" → previous comes after this
     const linkPrev=/^(then|and then|after that|afterwards)$/.test(c)||afterWord;
     if(pv&&!rpt&&!pv.repeat&&kind!=='project'&&pv.kind!=='project'&&pv.date===it.date&&!/\bat some point\b/i.test(pc.text)){if(linkPrev)it.after.push(pv.n);if(beforeThat&&!pv.after.includes(n))pv.after.push(n)}
     items.push(it);
   });
+  {const words=x=>x.title.toLowerCase().replace(/^(?:go to|head to|go|head|do|have|get to)\s+/,'').replace(/\(.*?\)/g,'').split(/[^a-z]+/).filter(w=>w.length>=3&&!['the','and','with','for','from','mine'].includes(w));
+    for(let i=items.length-1;i>0;i--){const a=items[i];if(a.kind==='project'||a.shopping||a.repeat)continue;const wa=words(a);if(!wa.length)continue;
+      const b=items.find(o=>o!==a&&o.n<a.n&&o.date===a.date&&!o.shopping&&o.kind!=='project'&&!o.repeat&&(!o.time||!a.time||o.time===a.time)&&(()=>{const wb=words(o);return wb.length&&(wa.every(w=>wb.includes(w))||wb.every(w=>wa.includes(w)))})());
+      if(!b)continue;const keep=a.time&&!b.time?a:b,drop=keep===a?b:a;
+      ['time','part','deadline','duration','minDuration','maxDuration','due'].forEach(k=>{if(keep[k]==null&&drop[k]!=null)keep[k]=drop[k]});if(drop.time||keep.time)keep.part=keep.time?null:keep.part;if(keep.time&&QS_EVENT.test(keep.title))keep.kind='event';
+      if(words(drop).length<words(keep).length||(keep.title.length>drop.title.length&&/^(go|head) to\b/i.test(keep.title)))keep.title=drop.title.length<keep.title.length&&!/^(go|head) to\b/i.test(drop.title)?drop.title:keep.title;
+      keep.after=[...new Set(keep.after.concat(drop.after).filter(n=>n!==keep.n&&n!==drop.n))];items.forEach(o=>{o.after=[...new Set(o.after.map(n=>n===drop.n?keep.n:n))].filter(n=>n!==o.n)});items.splice(items.indexOf(drop),1)}}
   // common-sense order: cooking/baking after buying groceries that day; dough after feeding the starter
   items.forEach(it=>{
     if(/^(prep|make|bake|cook)\b|\b(dough|buns?|bread|cake)\b/i.test(it.title)){items.forEach(o=>{if(o!==it&&o.date===it.date&&o.n<it.n+20&&!o.after.includes(it.n)&&((o.shopping&&o.shop.some(x=>sectionOf(x)!=='other'))||(/\bfeed\b.*\bstarter\b/i.test(o.title)&&/\b(dough|sourdough|bread|buns?)\b/i.test(it.title)))&&!it.after.includes(o.n))it.after.push(o.n)})}});
   // durations for tasks when nobody said one
   items.forEach(it=>{if(!it.duration&&!it.minDuration&&it.kind==='task'&&!it.tsteps){const g=QS_DUR.find(([re])=>re.test(it.title));it.duration=g?g[1]:15}if(it.kind==='event'&&!it.duration&&!it.minDuration)it.duration=60});
+  {const map=new Map(items.map((it,ix)=>[it.n,ix]));items.forEach((it,ix)=>{it.after=[...new Set(it.after.map(n=>map.get(n)).filter(x=>x!=null&&x!==ix))];it.n=ix})}
   return{mood:null,energy:null,minutes:null,feeling:'',mentions:items.map(i=>i.quote),
-    items:items.map(i=>({repeat:i.repeat,due:i.due,phases:i.phases?i.phases.map(([t,st])=>({title:t,steps:st.map(([a,m,e])=>({title:a,minutes:m,energy:e}))})):null,mention:i.n,title:i.title,kind:i.kind,energy:i.energy,date:i.date,dateSaid:i.dateSaid,time:i.time,part:i.part,deadline:i.deadline,approx:null,duration:i.duration,minDuration:i.minDuration,maxDuration:i.maxDuration,after:i.after,out:i.out,shop:i.shop,
+    items:items.map(i=>({anytime:i.anytime,repeat:i.repeat,due:i.due,phases:i.phases?i.phases.map(([t,st])=>({title:t,steps:st.map(([a,m,e])=>({title:a,minutes:m,energy:e}))})):null,mention:i.n,title:i.title,kind:i.kind,energy:i.energy,date:i.date,dateSaid:i.dateSaid,time:i.time,part:i.part,deadline:i.deadline,approx:null,duration:i.duration,minDuration:i.minDuration,maxDuration:i.maxDuration,after:i.after,out:i.out,shop:i.shop,
       steps:i.tsteps||[{title:i.title,minutes:i.duration||(i.minDuration&&i.maxDuration?Math.round((i.minDuration+i.maxDuration)/2):15)}]}))};
 }
 
@@ -1799,6 +1839,7 @@ function routineSheet(id,preset,back,onSaved){
     <label class="lbl" for="rtA">Starts</label><input type="date" id="rtA" value="${d.anchor}">
     <div style="margin-top:14px">${repRowHTML(d,true)}</div>
     <div class="lbl">🔔 Remind me</div>${remSelectHTML('rtRm',r0.remind==null?'none':r0.remind,false)}
+    <label class="toggle" style="margin-top:12px"><input type="checkbox" id="rtFx" ${(r0.flex!=null?r0.flex:FLEX_RE.test(r0.title||''))?'checked':''}><span>Flexible: other plans can overlap it</span></label>
     ${id?`<label class="toggle" style="margin-top:12px"><input type="checkbox" id="rtP" ${r0.paused?'checked':''}><span>Paused for now</span></label>`:''}
     <button class="btn mauve block mt" data-save>Save</button>${id?'<button class="btn ghost block" data-del>Delete the whole series</button>':''}<button class="btn ghost block" data-cancel>Cancel</button>`,el=>{
     bindRepChange(el,d);bindRemSel(el,'rtRm');
@@ -1808,7 +1849,7 @@ function routineSheet(id,preset,back,onSaved){
       if(b.hasAttribute('data-save')){repRead(el,d);const title=el.querySelector('#rtT').value.trim(),st=el.querySelector('#rtS').value,en=el.querySelector('#rtE').value,an=el.querySelector('#rtA').value;
         if(!title){el.querySelector('#rtT').focus();return}if(!st||!en||toMin(en)<=toMin(st)){toast('“Until” needs to be after “From”');return}
         if(isDK(an))d.anchor=an;const rule=repRule(d);if(!rule){toast('Pick how often it repeats');return}if(rule.freq==='weekly'&&!rule.days.length){toast('Pick at least one day');return}
-        const o=id?r0:{id:uid(),kind:'busy',skips:[],over:{}};delete o.count;delete o.until;Object.assign(o,{title,start:st,end:en},rule);{const rv=remRead(el,'rtRm');o.remind=rv==='none'?undefined:rv}o.paused=!!(el.querySelector('#rtP')&&el.querySelector('#rtP').checked);
+        const o=id?r0:{id:uid(),kind:'busy',skips:[],over:{}};delete o.count;delete o.until;Object.assign(o,{title,start:st,end:en},rule);{const rv=remRead(el,'rtRm');o.remind=rv==='none'?undefined:rv}o.paused=!!(el.querySelector('#rtP')&&el.querySelector('#rtP').checked);o.flex=!!el.querySelector('#rtFx').checked;
         if(!id)S.routines.push(o);if(onSaved)onSaved(o);save();toast(id?'Saved':'Added · '+repText(o));if(id&&o.ics)icsNudge([o],'moved');done()}
       else if(b.hasAttribute('data-del'))confirmInline(b,'Tap again to delete every one',()=>{S.routines=S.routines.filter(x=>x!==r0);save();if(r0.ics)icsNudge([r0],'deleted');done()});
       else done()}});
@@ -2540,7 +2581,7 @@ function sudokuSheet(hid){
 function workSpan(k){const w=routinesOn(k).filter(r=>r.e-r.s>=240&&r.rkind!=='routine');if(!w.length)return null;return{s:Math.min(...w.map(r=>r.s)),e:Math.max(...w.map(r=>r.e))}}
 const hasWorkRoutine=()=>(S.routines||[]).some(r=>r.start&&r.end&&r.kind!=='task'&&r.kind!=='routine'&&toMin(r.end)-toMin(r.start)>=240&&!r.paused);
 function isWorkday(k){if(workSpan(k))return true;if(hasWorkRoutine())return false;const d=parseDK(k).getDay();return d>=1&&d<=5}
-function readyWin(k){const rd=S.settings.ready||{},ws=workSpan(k);const end=rd.end?toMin(rd.end):ws?ws.s:540;const start=rd.start?toMin(rd.start):Math.max(0,end-120);return end>start?{s:start,e:end}:null}
+function readyWin(k){const ov=(S.readyOver||{})[k];if(ov)return ov.e>ov.s?{s:ov.s,e:ov.e}:null;const rd=S.settings.ready||{},ws=workSpan(k);const end=rd.end?toMin(rd.end):ws?ws.s:540;const start=rd.start?toMin(rd.start):Math.max(0,end-120);return end>start?{s:start,e:end}:null}
 function readyOn(k){if((S.settings.ready||{}).on===false||!isWorkday(k))return [];const w=readyWin(k);if(!w)return [];
   return freeGaps(w.s,w.e,routinesOn(k)).filter(g=>g.e-g.s>=5).map(g=>({s:g.s,e:g.e,kind:'busy',title:'Getting ready',rid:'ready',date:k,ready:true}))}
 function busyOn(k){return routinesOn(k).concat(readyOn(k))}
@@ -3074,7 +3115,10 @@ function csGrowthHTML(){const g=growthInfo(),n=esc(petName()),nx=nextUnlock(),G=
   ${nx?`<div class="card nxu"><span class="nxa">${unlArt(nx.u,true)}</span><span style="flex:1;min-width:0"><b>Next unlock</b><span class="sub small" style="display:block;margin:2px 0 6px">${nx.left} ✦ until something new</span><div class="bar pe"><i style="width:${nx.pct}%"></i></div><span class="sub small" style="display:block;margin:6px 0 0">${lifeEarned()} ✦ earned in total · spending never counts against it</span></span></div>`:''}
   <button class="card gprev" data-cs="tab" data-k="garden"><span class="gpmini">${G.slice(-3).map(e=>gPlant(e)).join('')||plant(0,{wave:false,outfit:[]})}</span><span style="flex:1;text-align:left"><b>My garden</b><span class="sub small" style="display:block;margin:2px 0 0">${G.length?`${G.length} grown so far · tap to visit`:'Fully grown companions are planted here for good'}</span></span><span class="chev">›</span></button>`}
 function gardenScroll(){setTimeout(()=>{const g=document.getElementById('gardenS');if(g)g.scrollLeft=g.scrollWidth},30)}
-function csCharsHTML(){return `${csColorsHTML()}<p class="sub small" style="margin:0 2px 10px">Switching keeps your growth and outfits.</p><div class="colgrid">${CHAR_ORDER.map(id=>{const lk=!isUnl('char',id),on=S.companion.type===id;
+function csFacesHTML(){const mm=!!S.companion.matchMood,cur=restFace();
+  return `<div class="card csfaces"><div class="cfrow"><span class="cfprev" id="cfPrev">${plant(S.grow.stage,{face:mm?undefined:cur,wave:false})}</span><span style="flex:1"><b>Face</b><span class="sub small" style="display:block;margin:2px 0 0">${mm?'Matching your mood from today’s check-in':esc((FACES.find(f=>f[0]===cur)||[0,''])[1])}</span></span></div>
+    <div class="facepick">${FACES.map(([k,l])=>`<button class="fpc ${cur===k&&!mm?'on':''}" data-cs="face" data-k="${k}">${plant(S.grow.stage,{face:k,wave:false,outfit:[]})}<small>${l}</small></button>`).join('')}<button class="fpc ${mm?'on':''}" data-cs="mood"><span class="mmico">🌦️</span><small>Match my mood</small></button></div></div>`}
+function csCharsHTML(){return `${csFacesHTML()}${csColorsHTML()}<p class="sub small" style="margin:0 2px 10px">Switching keeps your growth and outfits.</p><div class="colgrid">${CHAR_ORDER.map(id=>{const lk=!isUnl('char',id),on=S.companion.type===id;
   return `<button class="colt ${lk?'locked':''} ${on?'on':''}" ${lk?'disabled':`data-cs="char" data-id="${id}"`}>${unlArt({k:'char',id},lk)}<b>${lk?'???':esc((S.companion.names||{})[id]||CHARS[id].dflt)}</b><span class="sub small">${lk?`🔒 Unlocks at ${unlockAt('char',id)||'?'} ✦ earned`:on?'With you now':esc(CHARS[id].label)}</span></button>`}).join('')}</div>`}
 function csShopHTML(){const b=balance(),slot=ui.slot||'all',pass=id=>slot==='all'||ITEMS[id].slot===slot;
   let o=`<div class="csbal"><span class="spark" style="width:24px;height:24px;font-size:12px">✦</span><b>${b}</b><span class="sub small">to spend · spending never slows growth</span></div>
@@ -3108,6 +3152,8 @@ function compSheet(tab){
   const redraw=keepScroll=>{if(!CS||!CS.el)return;const y=CS.el.scrollTop;CS.el.innerHTML='<div class="grab"></div>'+draw();CS.el.scrollTop=keepScroll?y:0};
   if(CS.tab==='garden')gardenScroll();
   openSheet(draw(),el=>{CS.el=el;el.onclick=e=>{const b=e.target.closest('[data-cs]');if(!b)return;e.stopPropagation();const a=b.dataset.cs,id=b.dataset.id;
+    if(a==='face'){S.companion.faces=S.companion.faces||{};S.companion.faces[S.companion.type]=b.dataset.k;S.companion.matchMood=false;save();render();redraw(true);return}
+    if(a==='mood'){S.companion.matchMood=!S.companion.matchMood;save();render();redraw(true);toast(S.companion.matchMood?'I’ll match your mood from the check-in':'Mood matching off');return}
     if(a==='tab'){CS.tab=b.dataset.k;redraw(false);if(CS.tab==='garden')gardenScroll()}
     else if(a==='story'){closeSheet();setTimeout(()=>gardenStory(id),260)}
     else if(a==='seed'){closeSheet();setTimeout(seedPick,260)}
@@ -3537,8 +3583,13 @@ function pushS(){S.push=S.push||{on:false,morning:true,evening:true,tasks:true,n
 const fromMin=m=>{m=((m%1440)+1440)%1440;return pad(Math.floor(m/60))+':'+pad(m%60)};
 const mTimeOf=()=>pushS().mTime||fromMin(toMin(S.settings.dayStart||'08:00')+30);
 const eTimeOf=()=>pushS().eTime||fromMin(toMin(S.settings.bedtime||'23:00')-60);
+const webAI={limits:async()=>({images:false}),json:async(prompt,opts={})=>{
+  const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:String(prompt).slice(0,24000)}),signal:opts.signal});
+  if(!r.ok)throw{code:r.status===429?'rate_limited':'ai_unavailable'};const j=await r.json();let t=String(j.text||'').trim().replace(/^```(?:json)?\s*|\s*```$/g,'');
+  const a=t.indexOf('{'),b=t.lastIndexOf('}');try{return JSON.parse(t.slice(a,b+1))}catch(e){throw{code:'invalid_json'}}}};
 async function webInit(){if(!WEB)return;
   try{const r=await fetch('/api/config',{cache:'no-store'});PUSH_CFG=r.ok?await r.json():null}catch(e){PUSH_CFG=null}
+  if(PUSH_CFG&&PUSH_CFG.ai&&!SAMPLE)SAMPLE=webAI; /* your own AI key on Vercel: same features as in Claude, Quick sort if it fails */
   if(!PUSH_CFG||!PUSH_CFG.appId||!pushCapable())return;
   window.OneSignalDeferred=window.OneSignalDeferred||[];
   const sc=document.createElement('script');sc.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';sc.defer=true;document.head.appendChild(sc);
@@ -3621,6 +3672,32 @@ function undoLedger(id){const l=S.ledger.find(x=>x.id===id);if(!l)return;const k
 function doneTodayHTML(){const k=dkey(),L=S.ledger.filter(l=>l.key&&dkey(new Date(l.at))===k&&/^(s|tb|h|rs|rf):/.test(l.key)).slice().reverse();if(!L.length)return '';
   const name=l=>l.reason.replace(/^(Step|Finished|Hobby|Routine): /,'');
   return `<div class="sec slide"><h2>Done today</h2><button class="link" data-act="donetoggle">${ui.dtOpen?'Hide':`Show (${L.length})`}</button></div>${ui.dtOpen?`<section class="card dtl slide">${L.slice(0,30).map(l=>`<div class="dtrow"><span class="tick sm done">${UI.tickS}</span><span class="dtt">${esc(name(l))}</span><span class="badge">${l.points?'+'+l.points+' ✦':'✦'}</span><button class="link" data-act="undol" data-id="${l.id}">Undo</button></div>`).join('')}</section>`:''}`}
+/* ================= Flexible and fixed blocks: your own moves may overlap flexible time ================= */
+const FLEX_RE=/\b(getting ready|wind[- ]?down|breakfast|lunch|dinner|meals?|snack|break|coffee|tea time|stretch|shower|bath|morning routine|evening routine)\b/i;
+function isFlex(o){if(!o)return false;if(o.ready)return true;
+  const blk=(S.blocks||[]).includes(o)?o:null;
+  if(blk){if(blk.flex!=null)return !!blk.flex;if(blk.locked||blk.kind==='event')return FLEX_RE.test(blk.title||'');return true}
+  if(o.rid){const r=(S.routines||[]).find(x=>x.id===o.rid);if(r&&r.flex!=null)return !!r.flex;return o.rkind==='routine'||(r&&r.kind==='task')||FLEX_RE.test(o.title||'')}
+  return false}
+const ovMin=(a,b)=>Math.max(0,Math.min(a.e,b.e)-Math.max(a.s,b.s));
+function nextFree(k,b,from){const dur=b.e-b.s,occ=calOcc(k,b);for(let d=0;d<=1440;d+=5){for(const t of [from+d,from-d]){if(t<0||t+dur>1440||(d===0&&t!==from&&false))continue;if(!occ.some(o=>overlaps(o,{s:t,e:t+dur})))return t}}return null}
+async function placeCheck(b,k,s){const r={s,e:s+(b.e-b.s)},hits=calOcc(k,b).filter(o=>overlaps(o,r)),fixed=hits.filter(o=>!isFlex(o));
+  if(fixed.length){const f=fixed[0];
+    const v=await askSheet('This overlaps',`This overlaps with ${esc(f.title)} (${fmt(f.s)}–${fmt(f.e)}). Place anyway?`,[{label:'Yes, place it',v:'yes',cls:'mauve'},{label:'Find another time',v:'find',cls:'cream'},{label:'Cancel',v:'cancel',cls:'ghost'}]);
+    if(v==='cancel'||!v){closeSheet();render();return}
+    if(v==='find'){const ns=nextFree(k,b,s);if(ns==null){closeSheet();toast('No free time left that day');render();return}return confirmMove(b,k,ns)}}
+  await confirmMove(b,k,s);
+  const flex=hits.filter(o=>isFlex(o));if(flex.length){const f=flex[0];setTimeout(()=>toast(`Overlaps with ${f.title} by ${ovMin(f,r)} min`,'Shorten it',()=>shortenFlex(f,k,r),9000),450)}}
+function shortenFlex(f,k,r){const before=r.s-f.s,after=f.e-r.e,ns=before>=after?f.s:r.e,ne=before>=after?r.s:f.e;
+  if(f.ready){(S.readyOver=S.readyOver||{})[k]={s:ns,e:Math.max(ns,ne)}}
+  else if((S.blocks||[]).includes(f)){f.s=ns;f.e=Math.max(ns+5,ne)}
+  else if(f.rid){const ro=S.routines.find(x=>x.id===f.rid);if(ro){ro.over=ro.over||{};ro.over[k]={start:fmt(ns),end:fmt(Math.max(ns+5,ne))}}}
+  save();render();toast(`${f.title} is now ${fmt(ns)}–${fmt(Math.max(ns,ne))}`)}
+/* Side by side: overlapping things in the day view share the width */
+function lanes(list){const L=list.slice().sort((a,b)=>a.s-b.s||b.e-a.e);let cl=[],end=-1,out=new Map();const flush=()=>{const cols=[];cl.forEach(it=>{let c=cols.findIndex(e=>e<=it.s);if(c<0){c=cols.length;cols.push(0)}cols[c]=it.e;out.set(it,{c,n:0})});cl.forEach(it=>out.get(it).n=cols.length);cl=[]};
+  L.forEach(it=>{if(it.s>=end&&cl.length){flush();end=-1}cl.push(it);end=Math.max(end,it.e)});if(cl.length)flush();return out}
+const laneStyle=x=>x&&x.n>1?`left:calc(48px + (100% - 48px) * ${x.c} / ${x.n});right:auto;width:calc((100% - 48px) / ${x.n} - 3px);`:'';
+
 function seed(){
   const H=(name,minutes,energy,kind='hobby',extra={})=>Object.assign({id:uid(),name,minutes,energy,kind,tags:[],note:'',lastDone:null},extra);
   const hobbies=[];
@@ -4152,8 +4229,7 @@ function settingsHTML(){
 
   <div class="group" style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-top:10px"><label for="pn" style="font-weight:900;flex:none">Name</label><input type="text" id="pn" value="${esc(petName())}" maxlength="20" style="flex:1"></div>
   <p class="sub small" style="margin:8px 2px 0">Switching keeps your growth and outfits. Each companion keeps its own name.</p>
-  <div class="lbl">Face</div><div class="facepick">${FACES.map(([k,l])=>`<button class="fpc ${restFace()===k&&!S.companion.matchMood?'on':''}" data-face="${k}">${plant(S.grow.stage,{face:k,wave:false})}<small>${l}</small></button>`).join('')}</div>
-  <div class="group" style="margin-top:8px"><label class="set"><span>Match my mood (uses today’s check-in)</span><input type="checkbox" id="mmIn" ${S.companion.matchMood?'checked':''} style="width:auto"></label></div>
+  <p class="sub small" style="margin:8px 2px 0">Faces moved: tap your companion on Today → Characters.</p>
   <div class="lbl">Appearance</div>
   <button class="group setrow" data-themes><span class="th-dot" data-theme="${th.id}"></span><b>Colour theme</b><span class="v">${th.name}</span><span class="chev">${UI.chev}</span></button>
   <div class="lbl">Planning</div>
@@ -4341,10 +4417,10 @@ function vRoulette(){
 }
 
 /* ================= Quit tab ================= */
-const QKINDS=[['weed','Weed','🌿'],['alcohol','Alcohol','🍷'],['vape','Vaping','💨'],['custom','Something else','✳️']];
+const QKINDS=[['smoking','Smoking','🚬'],['alcohol','Alcohol','🍷'],['weed','Weed','🌿'],['vape','Vaping','💨'],['custom','Custom','✳️']];
 const QTRIG=[['bored','Bored'],['stressed','Stressed'],['social','Social'],['tired','Tired']];
 const QMILES=[[1,'1 day',10],[7,'1 week',30],[30,'1 month',60],[90,'3 months',100],[365,'1 year',200]];
-const qEmoji=g=>(QKINDS.find(k=>k[0]===g.kind)||QKINDS[3])[2];
+const qEmoji=g=>(QKINDS.find(k=>k[0]===g.kind)||QKINDS.find(k=>k[0]==='custom'))[2];
 function qHash(pin){let h=5381;const s='tend·'+pin;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36)}
 function normQuit(q){q=q&&typeof q==='object'?q:{};return{enabled:q.enabled!=null?!!q.enabled:!TESTER,name:typeof q.name==='string'&&q.name.trim()?q.name.trim().slice(0,14):(TESTER?'Habits':'Quit'),pin:q.pin||null,helpline:q.helpline||'',helpNum:q.helpNum||'',
   goals:(Array.isArray(q.goals)?q.goals:[]).filter(g=>g&&g.id).map(g=>Object.assign({mode:'quit',limit:0,cost:0,slips:[],cravings:[],miles:[]},g))}}
@@ -4618,7 +4694,7 @@ async function runSort(){
   F.local=false;
   F.step='think';F.err='';renderFlow();F.ctl=new AbortController();
   try{const r=await SAMPLE.json(sortPrompt(F.text),{signal:F.ctl.signal});if(!F)return;applySort(r);F.step='heard';renderFlow()}
-  catch(e){if(!F)return;F.step='dump';F.err=e&&e.code==='cancelled'?'':sortErr(e);renderFlow()}
+  catch(e){if(!F)return;if(WEB&&!(e&&e.code==='cancelled')){console.warn('AI sort fallback',e);applySort(localSort(F.text));F.local=true;F.step='heard';F.err='';renderFlow();toast('AI sorting wasn’t available, so I used Quick sort.');return}F.step='dump';F.err=e&&e.code==='cancelled'?'':sortErr(e);renderFlow()}
   finally{if(F)F.ctl=null}
 }
 function sortErr(e){const c=e&&e.code;
@@ -4658,7 +4734,7 @@ function applySort(r){
     if(kind==='task'&&dur&&!min){const sum=steps.reduce((a,s)=>a+s.minutes,0);if(Math.abs(sum-dur)<3)dur=null}
     const it=mkItem({title,kind,energy:EN3.includes(t.energy)?t.energy:'medium',date:d||F.target,dateSaid:!!d,time:hhmm(t.time),part:['morning','afternoon','evening','after_work'].includes(t.part)?t.part:null,deadline:hhmm(t.deadline),approx:t.approx?String(t.approx).slice(0,40):null,dur,min,max,out:!!t.out,quote:mi>=0&&mentions[mi]?mentions[mi]:'',steps});
     const an=String(t.area||'').toLowerCase(),ar=S.areas.find(a=>a.name.toLowerCase()===an);it.area=ar?ar.id:guessArea(title+' '+_ps);
-    it.repeat=normRepeat(t.repeat,it.date);
+    it.repeat=normRepeat(t.repeat,it.date);if(t.anytime&&kind==='task'&&!it.time){it.later=true;it.anytime=true;it.dateSaid=false}
     if(hhmm(t.endTime)&&it.time){const d2=toMin(hhmm(t.endTime))-toMin(it.time);if(d2>0){it.dur=d2;if(it.steps.length===1)it.steps[0].minutes=d2;if(it.repeat&&it.kind==='task')it.kind='event'}}
     if(kind==='project'){it.due=isDK(t.due)&&t.due>=dkey()?t.due:null;it.time=null;it.part=null;it.deadline=null;it.dateSaid=false}
     it.shop=(Array.isArray(t.shop)?t.shop:[]).map(x=>String(x||'').trim().slice(0,40)).filter(Boolean).slice(0,30);if(!it.shop.length&&/^(buy|get)\b/i.test(title))it.shop=splitShop(title);
@@ -4678,7 +4754,7 @@ const DUR_OPTS=[5,10,15,20,25,30,40,45,60,75,90,120,150,180,240];
 const stepSum=i=>i.steps.reduce((a,s)=>a+s.minutes,0);
 const itemDur=i=>i.dur||(i.kind==='event'?60:stepSum(i))||10;
 const durLabel=m=>m<60?`${m} min`:m%60?`${Math.floor(m/60)} h ${m%60}`:`${m/60} h`;
-function itemWhen(i){if(i.later)return 'Later';if(i.approx)return i.approx;const b=[dateLabel(i.date)];if(i.time)b.push('at '+i.time);else if(i.part)b.push(partLabel(i.part).toLowerCase());return b.join(' · ')}
+function itemWhen(i){if(i.later)return i.anytime?'Anytime':'Later';if(i.approx)return i.approx;const b=[dateLabel(i.date)];if(i.time)b.push('at '+i.time);else if(i.part)b.push(partLabel(i.part).toLowerCase());return b.join(' · ')}
 function fHeard(){
   const c=F.checkin,today=F.target===dkey(),pk=k=>F.picked[k]?' <span class="opt">· from what you said</span>':'';
   const n=F.items.filter(i=>i.on).length,name=id=>{const x=F.items.find(y=>y.id===id);return x?x.title:''};
@@ -4811,7 +4887,7 @@ function buildPlan(){
   const toLater=(i,why)=>{later.push({i,why});st[i.id]='later'};
   F.tmpR=all.filter(i=>i.repeat&&!i.later&&i.time).map(i=>({id:'tmp'+i.id,iid:i.id,tmp:true,title:i.title,start:i.time,end:fmt(Math.min(1439,toMin(i.time)+itemDur(i))),freq:i.repeat.freq,days:i.repeat.days,anchor:firstOcc(i),until:i.repeat.until,skips:[],over:{}}));
   all.filter(i=>i.repeat).forEach(i=>{if(i.later)toLater(i,'you chose Later');else if(!i.time)toLater(i,'a repeating plan needs a start time');else st[i.id]='routine'});
-  items.forEach(i=>{if(i.later)toLater(i,'you chose Later');else if(i.approx)toLater(i,`${i.approx}, no exact day yet`);else if(i.date<today)toLater(i,'that day has passed')});
+  items.forEach(i=>{if(i.later)toLater(i,i.anytime?'Anytime: no day said, so it waits in your to-dos':'you chose Later');else if(i.approx)toLater(i,`${i.approx}, no exact day yet`);else if(i.date<today)toLater(i,'that day has passed')});
   // 1. start times you gave are locked
   items.filter(i=>!st[i.id]&&i.time).forEach(i=>{
     const k=i.date,s=toMin(i.time),dur=itemDur(i),r={s,e:s+dur};
@@ -5210,10 +5286,10 @@ function dayViewHTML(k){
   const busy=busyOn(k),ev=gEventsOn(k),bl=blocksOn(k);
   const vis=busy.concat(ev).concat(bl);
   if(!vis.length)return `<div class="card empty">Nothing on ${esc(dateLabel(k))} yet. Brain dump to plan it.</div>`;
-  const fr=tlFrame(k,vis);let h=fr.h;const top=s=>((s-fr.T0)*PPM).toFixed(1);
-  busy.forEach(f=>{h+=`<button class="tl-b busy rtb" data-act="rtocc" data-id="${f.rid}" data-k="${k}" style="top:${top(f.s)}px;height:${Math.max((f.e-f.s)*PPM-2,26).toFixed(1)}px"><span>${f.ready?'🌅':f.rkind==='routine'?'▶︎':'🔁'} ${esc(f.title)} · ${fmt(f.s)}–${fmt(f.e)}</span></button>`});
-  ev.forEach(f=>{h+=`<div class="tl-b event" style="top:${top(f.s)}px;height:${Math.max((f.e-f.s)*PPM-2,26).toFixed(1)}px"><span>Google · ${esc(f.title)} · ${fmt(f.s)}–${fmt(f.e)}</span></div>`});
-  bl.sort((a,b)=>a.s-b.s).forEach(b=>{h+=`<div class="tl-p view ${b.kind}" data-cb="${b.id}" style="top:${top(b.s)}px;height:${Math.max((b.e-b.s)*PPM-2,46).toFixed(1)}px"><span class="grip" data-cdrag="${b.id}" role="button" aria-label="Drag to move ${esc(b.title)}">⋮⋮</span><button class="tl-pb" data-act="blkopen" data-id="${b.id}"><b>${repBlk(b)?'🔁 ':''}${esc(b.title)}</b><span class="tl-time">${fmt(b.s)}–${fmt(b.e)}${b.cal?' · in Google':''}</span></button><button class="mini" data-act="blkdel" data-id="${b.id}" aria-label="Remove ${esc(b.title)}">${UI.x}</button></div>`});
+  const fr=tlFrame(k,vis);let h=fr.h;const top=s=>((s-fr.T0)*PPM).toFixed(1),LN=lanes(vis);
+  busy.forEach(f=>{h+=`<button class="tl-b busy rtb ${isFlex(f)?'flex':''}" data-act="rtocc" data-id="${f.rid}" data-k="${k}" style="${laneStyle(LN.get(f))}top:${top(f.s)}px;height:${Math.max((f.e-f.s)*PPM-2,26).toFixed(1)}px"><span>${f.ready?'🌅':f.rkind==='routine'?'▶︎':'🔁'} ${esc(f.title)} · ${fmt(f.s)}–${fmt(f.e)}</span></button>`});
+  ev.forEach(f=>{h+=`<div class="tl-b event" style="${laneStyle(LN.get(f))}top:${top(f.s)}px;height:${Math.max((f.e-f.s)*PPM-2,26).toFixed(1)}px"><span>Google · ${esc(f.title)} · ${fmt(f.s)}–${fmt(f.e)}</span></div>`});
+  bl.sort((a,b)=>a.s-b.s).forEach(b=>{const ovf=vis.filter(o=>o!==b&&overlaps(o,b)&&ovMin(o,b)>0);h+=`<div class="tl-p view ${b.kind} ${(LN.get(b)||{}).n>1?'narrow':''}" data-cb="${b.id}" style="${laneStyle(LN.get(b))}top:${top(b.s)}px;height:${Math.max((b.e-b.s)*PPM-2,46).toFixed(1)}px"><span class="grip" data-cdrag="${b.id}" role="button" aria-label="Drag to move ${esc(b.title)}">⋮⋮</span><button class="tl-pb" data-act="blkopen" data-id="${b.id}"><b>${repBlk(b)?'🔁 ':''}${esc(b.title)}</b><span class="tl-time">${fmt(b.s)}–${fmt(b.e)}${b.cal?' · in Google':''}</span>${ovf.length?`<span class="ovl">↔ ${(LN.get(b)||{}).n>1?'':'overlaps '+esc(ovf[0].title)+' by '}${ovMin(ovf[0],b)} min</span>`:''}</button><button class="mini" data-act="blkdel" data-id="${b.id}" aria-label="Remove ${esc(b.title)}">${UI.x}</button></div>`});
   return h+'</div>';
 }
 function bindCalDrag(){
@@ -5221,10 +5297,9 @@ function bindCalDrag(){
   tl.querySelectorAll('[data-cdrag]').forEach(hd=>{hd.addEventListener('pointerdown',e=>{
     const b=S.blocks.find(x=>x.id===hd.dataset.cdrag);if(!b)return;e.preventDefault();const el=hd.closest('.tl-p'),y0=e.clientY,dur=b.e-b.s;let ns=b.s;
     try{hd.setPointerCapture(e.pointerId)}catch(_){}el.classList.add('dragging');
-    const mv=ev=>{ns=Math.max(0,Math.min(1440-dur,b.s+Math.round((ev.clientY-y0)/PPM/5)*5));el.style.top=((ns-T0)*PPM)+'px';const tm=el.querySelector('.tl-time');if(tm)tm.textContent=`${fmt(ns)}–${fmt(ns+dur)}`;el.classList.toggle('bad',calOcc(b.date,b).some(o=>o.s<ns+dur&&ns<o.e))};
-    const up=()=>{hd.removeEventListener('pointermove',mv);hd.removeEventListener('pointerup',up);hd.removeEventListener('pointercancel',up);el.classList.remove('dragging','bad');
-      if(ns===b.s){render();return}const hit=calOcc(b.date,b).find(o=>o.s<ns+dur&&ns<o.e);if(hit){toast(`That would overlap “${hit.title}” (${fmt(hit.s)}–${fmt(hit.e)}).`);render();return}
-      confirmMove(b,b.date,ns)};
+    const mv=ev=>{ns=Math.max(0,Math.min(1440-dur,b.s+Math.round((ev.clientY-y0)/PPM/5)*5));el.style.top=((ns-T0)*PPM)+'px';const tm=el.querySelector('.tl-time');if(tm)tm.textContent=`${fmt(ns)}–${fmt(ns+dur)}`;{const hh=calOcc(b.date,b).filter(o=>o.s<ns+dur&&ns<o.e);el.classList.toggle('bad',hh.some(o=>!isFlex(o)));el.classList.toggle('soft',hh.length>0&&hh.every(o=>isFlex(o)))}};
+    const up=()=>{hd.removeEventListener('pointermove',mv);hd.removeEventListener('pointerup',up);hd.removeEventListener('pointercancel',up);el.classList.remove('dragging','bad','soft');
+      if(ns===b.s){render();return}placeCheck(b,b.date,ns)};
     hd.addEventListener('pointermove',mv);hd.addEventListener('pointerup',up);hd.addEventListener('pointercancel',up)})});
 }
 function calShift(dir){const c=ui.cal;if(c.view==='month'){const ym=dir>0?nextMonth(ymOf(c.date)):prevMonth(ymOf(c.date));c.date=ym+'-01'}else c.date=addDays(c.date,c.view==='week'?7*dir:dir);ui.anim=false;render()}
@@ -5269,22 +5344,24 @@ function calBlockSheet(id,mode){
   <div class="lbl">🔔 Remind me</div>${remSelectHTML('cbR',b.remind!=null?b.remind:(b.taskId&&(S.tasks.find(t=>t.id===b.taskId)||{}).remind),true)}
   ${b.cal?`<p class="sub small" style="margin:6px 2px 0">In Google Calendar with ${remMinutes(b.remind!=null?b.remind:(S.tasks.find(t=>t.id===b.taskId)||{}).remind,b.date,b.s)!=null?'an alert: '+esc(remLabel(b.remind!=null?b.remind:(S.tasks.find(t=>t.id===b.taskId)||{}).remind).toLowerCase())+'. Your iPhone shows it even when Tend is closed.':'no alert.'}</p>`:''}
   ${(()=>{const pt=b.taskId&&S.tasks.find(x=>x.id===b.taskId);return pt&&pt.project?`<button class="btn lav block" data-pmap>🗺 Open project map</button>`:''})()}<button class="btn cream block" data-tmr>⏱ Start a ${b.e-b.s} min timer</button>
-  <button class="btn cream block" data-ics>📲 ${b.ics?'Add to my phone’s calendar again':'Add to my phone’s calendar'}</button><button class="btn cream block" data-rep>🔁 Repeat this…</button><button class="btn lav block" data-rm>Remove this plan</button><button class="btn ghost block" data-close>Close</button>`,el=>{
+  <button class="btn cream block" data-ics>📲 ${b.ics?'Add to my phone’s calendar again':'Add to my phone’s calendar'}</button>
+  <label class="toggle" style="margin:10px 0 4px"><input type="checkbox" id="cbFlex" ${isFlex(b)?'checked':''}><span>Flexible: other plans can overlap it</span></label><button class="btn cream block" data-rep>🔁 Repeat this…</button><button class="btn lav block" data-rm>Remove this plan</button><button class="btn ghost block" data-close>Close</button>`,el=>{
     const check=()=>{const k=el.querySelector('#cbD').value,t=el.querySelector('#cbT').value,msg=el.querySelector('#cbMsg'),mv=el.querySelector('[data-move]');
       if(!isDK(k)||!t){mv.disabled=true;msg.textContent='Pick a day and a start time.';return null}
       const s=toMin(t),r={s,e:s+dur};if(r.e>1440){mv.disabled=true;msg.textContent='That runs past midnight. Pick an earlier time.';return null}
       if(k===b.date&&s===b.s){mv.disabled=true;msg.textContent='Pick a new day or time to move it.';return null}
       ensureMonths([ymOf(k)]);
-      const hit=calOcc(k,b).find(o=>overlaps(o,r));
-      if(hit){mv.disabled=true;msg.innerHTML=`That overlaps “${esc(hit.title)}” (${fmt(hit.s)}–${fmt(hit.e)}). Pick another time.`;return null}
+      const hits=calOcc(k,b).filter(o=>overlaps(o,r)),hard=hits.find(o=>!isFlex(o)),soft=hits.find(o=>isFlex(o));
+      if(hard){mv.disabled=false;msg.innerHTML=`That overlaps “${esc(hard.title)}” (${fmt(hard.s)}–${fmt(hard.e)}). I’ll ask before placing it.`;return{k,s}}
+      if(soft){mv.disabled=false;msg.innerHTML=`Overlaps with ${esc(soft.title)} by ${ovMin(soft,r)} min. That’s fine, it’s flexible.`;return{k,s}}
       const c=CAL[ymOf(k)];mv.disabled=false;msg.innerHTML=`${fmt(s)}–${fmt(s+dur)} on ${esc(dateLabel(k,true))} is free.${S.settings.useCal&&(!c||c.state!=='ok')?' (I haven’t read your Google Calendar for that day yet.)':''}`;return{k,s}};
-    check();el.oninput=check;el.onchange=e=>{if(e.target.id==='cbR'||e.target.id==='cbRT'){el.querySelector('#cbRT').hidden=el.querySelector('#cbR').value!=='custom';const v=remRead(el,'cbR');if(el.querySelector('#cbR').value==='custom'&&!el.querySelector('#cbRT').value)return;b.remind=v;save();
+    check();el.oninput=check;el.onchange=e=>{if(e.target.id==='cbFlex'){b.flex=e.target.checked;save();render();toast(b.flex?'Flexible: you can overlap it':'Fixed: I’ll ask before anything overlaps it');return}if(e.target.id==='cbR'||e.target.id==='cbRT'){el.querySelector('#cbRT').hidden=el.querySelector('#cbR').value!=='custom';const v=remRead(el,'cbR');if(el.querySelector('#cbR').value==='custom'&&!el.querySelector('#cbRT').value)return;b.remind=v;save();
         if(b.cal&&b.gid&&MCP)askSheet('Update the alert in Google Calendar too?','Tend replaces its own event with one that has the new alert. Your other events are never touched.',[{label:'Yes, update it',v:'yes',cls:'peach'},{label:'Not now',v:'cancel',cls:'ghost'}]).then(async v=>{if(v!=='yes')return;closeSheet();try{await gDelete(b.gid)}catch(e){}try{b.gid=await gCreate(b);b.cal=!!b.gid}catch(e){b.cal=false}save();Object.keys(CAL).forEach(k=>delete CAL[k]);render();toast(b.cal?'Google alert updated':'Couldn’t update Google Calendar')});else toast('Reminder: '+remLabel(v).toLowerCase());return}check()};
     el.onclick=e=>{const x=btnOf(e);if(!x)return;
       if(x.hasAttribute('data-pmap')){closeSheet();setTimeout(()=>projectMap(b.taskId),260);return}
       if(x.hasAttribute('data-ics')){closeSheet();setTimeout(()=>icsAddBlocks([b]),250);return}
       if(x.hasAttribute('data-tmr')){const t=b.taskId&&S.tasks.find(y=>y.id===b.taskId),st=t?(b.stepIds||[]).map(id=>t.steps.find(z=>z.id===id)).filter(z=>z&&!z.done):[];closeSheet();setTimeout(()=>timerSheet(b.title,b.e-b.s,st.length?()=>st.forEach(z=>completeStep(t.id,z.id)):null),260);return}
-      if(x.hasAttribute('data-move')){const r=check();if(r)confirmMove(b,r.k,r.s)}
+      if(x.hasAttribute('data-move')){const r=check();if(r)placeCheck(b,r.k,r.s)}
       else if(x.hasAttribute('data-rm'))confirmRemove(b);
       else if(x.hasAttribute('data-rep'))routineSheet(null,{title:b.title,start:fmt(b.s),end:fmt(b.e),freq:'weekly',days:[parseDK(b.date).getDay()],anchor:b.date},null,()=>{if(!b.cal)S.blocks=S.blocks.filter(y=>y!==b);else toast('The one-off Google event stays as it is.')});
       else closeSheet()};
