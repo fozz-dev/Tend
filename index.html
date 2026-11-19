@@ -5548,8 +5548,8 @@ function maybePromptCheckin(){if(OB||TOUR)return;if(!todayCheckin()&&lsGet('tend
 let lastDay=dkey();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(dkey()!==lastDay){lastDay=dkey();ui.pick=0;ui.jf=0}render();setTimeout(maybePromptCheckin,300);setTimeout(maybeCheckoutReminder,600)}});
 
-/* home-screen icon */
-try{const c=document.createElement('canvas');c.width=c.height=180;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,180);g.addColorStop(0,'#DCD0EE');g.addColorStop(1,'#F6CDB7');x.fillStyle=g;x.fillRect(0,0,180,180);
+/* home-screen icon (artifact editions only; the web version uses the real icon files) */
+if(!window.TEND_WEB)try{const c=document.createElement('canvas');c.width=c.height=180;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,180);g.addColorStop(0,'#DCD0EE');g.addColorStop(1,'#F6CDB7');x.fillStyle=g;x.fillRect(0,0,180,180);
   x.fillStyle='#E3C2E0';x.beginPath();x.ellipse(90,112,52,48,0,0,Math.PI*2);x.fill();x.fillStyle='#FCEDEA';x.beginPath();x.ellipse(90,128,30,22,0,0,Math.PI*2);x.fill();
   x.fillStyle='#3B2541';[72,108].forEach(cx=>{x.beginPath();x.ellipse(cx,104,7,9,0,0,Math.PI*2);x.fill()});
   x.strokeStyle='#8FA88C';x.lineWidth=5;x.lineCap='round';x.beginPath();x.moveTo(90,66);x.quadraticCurveTo(86,52,90,40);x.stroke();
